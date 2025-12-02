@@ -292,56 +292,30 @@ one, an error is signaled."
 (use-package consult
   :bind (("C-x b" . consult-buffer)
          ("C-c C-r" . consult-recent-file)))
-;; (use-package counsel
-;;   :after ivy
-;;   :config (counsel-mode))
-
-;; (use-package ivy
-;;   :bind
-;;   (("C-c C-r" . ivy-resume)
-;;    ("C-x B" . ivy-switch-buffer-other-window))
-;;   :config
-;;   (setq ivy-use-virtual-buffers t)
-;;   (setq ivy-count-format "(%d/%d) ")
-;;   (setq enable-recursive-minibuffers t)
-;;   (ivy-mode 1))
-
-;; (use-package ivy-rich
-;;   :after ivy
-;;   :init 
-;;   (ivy-rich-mode 1)
-;;   :config
-;;   (setq ivy-virtual-abbreviate 'full
-;;         ivy-rich-switch-buffer-align-virtual-buffer t
-;;         ivy-rich-path-style 'abbrev))
-
-;; (ivy-rich-mode 1)
-;; (require 'ivy-rich)
-
-;; TERMINALS AND SHELLS
-(use-package vterm
-:config
-(setq shell-file-name "/etc/profiles/per-user/oskar/bin/zsh"
-      vterm-max-scrollback 5000))
-
-(use-package vterm-toggle
-  :after vterm
+(use-package eshell-syntax-highlighting
+  :after esh-mode
   :config
-  (setq vterm-toggle-fullscreen-p nil)
-  (setq vterm-toggle-scope 'project)
-  (add-to-list 'display-buffer-alist
-               '((lambda (buffer-or-name _)
-                     (let ((buffer (get-buffer buffer-or-name)))
-                       (with-current-buffer buffer
-                         (or (equal major-mode 'vterm-mode)
-                             (string-prefix-p vterm-buffer-name (buffer-name buffer))))))
-                  (display-buffer-reuse-window display-buffer-at-bottom)
-                  ;;(display-buffer-reuse-window display-buffer-in-direction)
-                  ;;display-buffer-in-direction/direction/dedicated is added in emacs27
-                  ;;(direction . bottom)
-                  ;;(dedicated . t) ;dedicated is supported in emacs27
-                  (reusable-frames . visible)
-                  (window-height . 0.3))))
+  (eshell-syntax-highlighting-global-mode +1))
+
+;; eshell-syntax-highlighting -- adds fish/zsh-like syntax highlighting.
+;; eshell-rc-script -- your profile for eshell; like a bashrc for eshell.
+;; eshell-aliases-file -- sets an aliases file for the eshell.
+  
+(setq eshell-rc-script (concat user-emacs-directory "eshell/profile")
+      eshell-aliases-file (concat user-emacs-directory "eshell/aliases")
+      eshell-history-size 5000
+      eshell-buffer-maximum-lines 5000
+      eshell-hist-ignoredups t
+      eshell-scroll-to-bottom-on-input t
+      eshell-destroy-buffer-when-process-dies t
+      eshell-visual-commands'("bash" "fish" "htop" "ssh" "top" "zsh"))
+
+(use-package esh-autosuggest
+  :hook (eshell-mode . esh-autosuggest-mode)
+  ;; If you have use-package-hook-name-suffix set to nil, uncomment and use the
+  ;; line below instead:
+  ;; :hook (eshell-mode-hook . esh-autosuggest-mode)
+  :ensure t)
 
 (use-package rainbow-mode
   :hook 
