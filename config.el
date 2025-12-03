@@ -81,6 +81,7 @@
     "b" '(:ignore t :wk "buffer")
     "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
     "b b" '(switch-to-buffer :wk "Switch buffer")
+    "b s" '(consult-buffer :wk "Search buffer")
     "b k" '(kill-this-buffer :wk "Kill this buffer")
     "b n" '(next-buffer :wk "Next buffer")
     "b p" '(previous-buffer :wk "Previous buffer")
@@ -96,6 +97,8 @@
 
     (dt/leader-keys
     "." '(find-file :wk "Find file")
+    "/" '(consult-ripgrep :wk "Ripgrep search")
+
     "f c" '((lambda () (interactive) (find-file "~/.config/emacs/config.el")) :wk "Edit emacs config")
     "f r" '(consult-recent-file :wk "Find recent files")
     "g c" '(comment-line :wk "Comment lines"))
@@ -322,8 +325,11 @@ one, an error is signaled."
         completion-category-overrides '((file (styles partial-completion)))))
 
 (use-package consult
-  :bind (("C-x b" . consult-buffer)
-         ("C-c C-r" . consult-recent-file)))
+  :config
+  (consult-customize
+   consult-ripgrep
+   :preview-key '(any)))
+
 (use-package eshell-syntax-highlighting 
   :after esh-mode
   :config
@@ -428,6 +434,11 @@ one, an error is signaled."
         tramp-verbose 1
         tramp-default-method "scp"
         tramp-use-ssh-controlmaster-options nil))
+
+(setq tramp-verbose 10)
+(setq recentf-exclude '("^/ssh:" "^/scp:" "^/sudo:" "^/adb:" "^/androidsu:"))
+;; Optional: disable remote file checking entirely
+(setq recentf-keep '(file-remote-p file-readable-p))
 
 (use-package daemons)
 
