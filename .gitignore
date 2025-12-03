@@ -1,6 +1,5 @@
 .DS_Store
 .projectile
-early-init.el
 elpaca/
 projectile-bookmarks.eld
 recentf
@@ -8,3 +7,6 @@ tramp
 auto-save-list
 projects
 elpa
+/transient/
+eshell/history
+eshell/lastdir

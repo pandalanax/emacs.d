@@ -36,7 +36,7 @@
 (use-package evil-collection
   :after evil
   :config
-  (setq evil-collection-mode-list '(dashboard dired ibuffer))
+  (setq evil-collection-mode-list '(dashboard dired ibuffer calendar))
   (evil-collection-init))
 
 ;; Evil tutor - separate block
@@ -55,6 +55,16 @@
   (interactive)
   (load-file user-init-file)
   (load-file user-init-file))
+(defun close-most-recent-window ()
+  "Close the most recently used window regardless of buffer content."
+  (interactive)
+  (let ((recent-win (next-window)))
+    (when (not (one-window-p))
+      (select-window recent-win)
+      (kill-buffer (window-buffer recent-win))
+      (delete-window)
+      (other-window -1))))
+
 
 (use-package general
   :config
@@ -69,11 +79,12 @@
 
   (dt/leader-keys
     "b" '(:ignore t :wk "buffer")
-    "bb" '(switch-to-buffer :wk "Switch buffer")
-    "bk" '(kill-this-buffer :wk "Kill this buffer")
-    "bn" '(next-buffer :wk "Next buffer")
-    "bp" '(previous-buffer :wk "Previous buffer")
-    "br" '(revert-buffer :wk "Reload buffer"))
+    "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
+    "b b" '(switch-to-buffer :wk "Switch buffer")
+    "b k" '(kill-this-buffer :wk "Kill this buffer")
+    "b n" '(next-buffer :wk "Next buffer")
+    "b p" '(previous-buffer :wk "Previous buffer")
+    "b r" '(revert-buffer :wk "Reload buffer"))
 
     (dt/leader-keys
     "e" '(:ignore t :wk "Evaluate")    
@@ -94,12 +105,20 @@
     "h f" '(describe-function :wk "Describe function")
     "h v" '(describe-variable :wk "Describe variable")
     ;;"h r r" '((lambda () (interactive) (load-file "~/.config/emacs/init.el")) :wk "Reload emacs config"))
-    "h r r" '(reload-init-file :wk "Reload emacs config"))
+    "h r r" '((lambda () (interactive)
+		    (load-file "~/.config/emacs/init.el")
+		    (ignore (elpaca-process-queues)))
+		:wk "Reload emacs config")
+    "h b" '(describe-bindings :wk "Describe bindings")
+    "h L" '(describe-language-environment :wk "Describe language environment")
+    )
+    ;; "h r r" '(reload-init-file :wk "Reload emacs config"))
 
   (dt/leader-keys
     "w" '(:ignore t :wk "Windows")
     ;; Window splits
     "w c" '(evil-window-delete :wk "Close window")
+    "w q" '(close-most-recent-window :wk "Close recent window") ;;function declared above
     ;;"w n" '(evil-window-new :wk "New window")
     "w s" '(evil-window-split :wk "Horizontal split window")
     "w v" '(evil-window-vsplit :wk "Vertical split window")
@@ -108,11 +127,12 @@
      "w e" '(evil-window-down :wk "Window down")
      "w i"   '(evil-window-up :wk "Window up")
      "w o" '(evil-window-right :wk "Window right")
-     "w w"     '(evil-window-next :wk "Goto next window"))
+     "w w"     '(evil-window-next :wk "Goto next window")
     ;; Move Windows
-    ;; "w <left>"  '(buf-move-left :wk "Buffer move left")
-    ;; "w <down>"  '(buf-move-down :wk "Buffer move down")
-    ;; "w <up>"    '(buf-move-up :wk "Buffer move up")
+    "w N"  '(buf-move-left :wk "Buffer move left")
+    "w E"  '(buf-move-down :wk "Buffer move down")
+    "w I"    '(buf-move-up :wk "Buffer move up")
+    "w o"    '(buf-move-right :wk "Buffer move right"))
 
   (dt/leader-keys
   ":" '(execute-extended-command :wk "M-x"))
@@ -132,6 +152,18 @@
     "p s g" '(projectile-grep :wk "Grep in project")
     "p k" '(projectile-kill-buffers :wk "Kill project buffers")
     "p v" '(dired-jump :wk "Open dired in current dir"))
+
+(dt/leader-keys
+  "g" '(:ignore t :wk "Git")
+  "g s" '(magit-status :wk "Magit status")
+  "g b" '(magit-branch :wk "Branch")
+  "g f" '(magit-fetch :wk "Fetch")
+  "g p" '(magit-push :wk "Push")
+  "g P" '(magit-pull :wk "Pull")
+  "g l" '(magit-log :wk "Log")
+  "g d" '(magit-diff :wk "Diff")
+  "g c" '(magit-commit :wk "Commit"))
+
 
 
 )
@@ -292,7 +324,7 @@ one, an error is signaled."
 (use-package consult
   :bind (("C-x b" . consult-buffer)
          ("C-c C-r" . consult-recent-file)))
-(use-package eshell-syntax-highlighting
+(use-package eshell-syntax-highlighting 
   :after esh-mode
   :config
   (eshell-syntax-highlighting-global-mode +1))
@@ -308,7 +340,7 @@ one, an error is signaled."
       eshell-hist-ignoredups t
       eshell-scroll-to-bottom-on-input t
       eshell-destroy-buffer-when-process-dies t
-      eshell-visual-commands'("bash" "fish" "htop" "ssh" "top" "zsh"))
+      eshell-visual-commands'("bash" "htop" "ssh" "top" "zsh" ))
 
 (use-package esh-autosuggest
   :hook (eshell-mode . esh-autosuggest-mode)
@@ -359,7 +391,16 @@ one, an error is signaled."
   (diminish 'which-key-mode)
   (diminish 'projectile-mode))
 
-(use-package magit)
+(use-package transient
+  :ensure t
+  :demand t)
+
+(use-package magit
+  :ensure t
+  :commands magit-status
+  :bind ("C-x g" . magit-status)
+  :init
+  (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1))
 
 (use-package hl-todo
   :hook ((org-mode . hl-todo-mode)
@@ -424,3 +465,27 @@ one, an error is signaled."
 ;; Force python-mode instead of python-ts-mode
 (setq treesit-load-symlinks nil)
 (setq treesit-extra-load-path nil)
+
+(use-package peep-dired
+  :after dired
+  :hook (evil-normalize-keymaps . peep-dired-hook)
+  :config
+    (evil-define-key 'normal dired-mode-map (kbd "<left>") 'dired-up-directory)
+    (evil-define-key 'normal dired-mode-map (kbd "<right>") 'dired-find-file) ; use dired-find-file instead if not using dired-open package
+    (evil-define-key 'normal peep-dired-mode-map (kbd "<down>") 'peep-dired-next-file)
+    (evil-define-key 'normal peep-dired-mode-map (kbd "<up>") 'peep-dired-prev-file)
+)
+
+(use-package doom-modeline
+  :ensure t
+  :init (doom-modeline-mode 1)
+  :config
+  (setq doom-modeline-height 20      ;; sets modeline height
+        doom-modeline-bar-width 5    ;; sets right bar width
+        doom-modeline-persp-name t   ;; adds perspective name to modeline
+        doom-modeline-persp-icon t)) ;; adds folder icon next to persp name
+(setq backup-directory-alist '((".*" . "/tmp/")))
+
+(use-package nix-mode
+  :mode "\\.nix\\'")
+
