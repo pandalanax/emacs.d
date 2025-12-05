@@ -21,4 +21,3 @@ alias gp git push
 alias gs git status
 alias ssh autossh -M 0
 alias d 'dired $1'
-alias logf sudo journalctl --no-pager -fu $1

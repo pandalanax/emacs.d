@@ -55,6 +55,7 @@
   (interactive)
   (load-file user-init-file)
   (load-file user-init-file))
+
 (defun close-most-recent-window ()
   "Close the most recently used window regardless of buffer content."
   (interactive)
@@ -64,7 +65,6 @@
       (kill-buffer (window-buffer recent-win))
       (delete-window)
       (other-window -1))))
-
 
 (use-package general
   :config
@@ -169,9 +169,17 @@
   "g p" '(magit-push :wk "Push")
   "g P" '(magit-pull :wk "Pull")
   "g l" '(magit-log :wk "Log")
-  "g d" '(magit-diff :wk "Diff")
-  "g c" '(magit-commit :wk "Commit"))
+  "g d" '(magit-diff :wk "Diff"))
 
+(dt/leader-keys
+  "TAB" '(:ignore t :wk "perspective")
+  "TAB TAB" '(persp-switch :wk "Switch perspective")
+  "TAB n" '(persp-next :wk "Next perspective")
+  "TAB k" '(persp-kill :wk "Kill named perspective")
+  "TAB p" '(persp-prev :wk "Previous perspective")
+  "TAB r" '(persp-rename :wk "Rename perspective")
+  "TAB s" '(persp-state-save :wk "Save perspectives")
+  "TAB l" '(persp-state-load :wk "Load perspectives"))
 
 
 )
@@ -352,6 +360,7 @@ one, an error is signaled."
       eshell-scroll-to-bottom-on-input t
       eshell-destroy-buffer-when-process-dies t
       eshell-visual-commands'("bash" "htop" "ssh" "top" "zsh" ))
+(add-to-list 'exec-path "/run/current-system/sw/bin/")
 
 (use-package esh-autosuggest
   :hook (eshell-mode . esh-autosuggest-mode)
@@ -507,3 +516,25 @@ one, an error is signaled."
 
 
 (setq confirm-kill-processes nil)
+(use-package perspective
+  :custom
+  ;; NOTE! I have also set 'SCP =' to open the perspective menu.
+  ;; I'm only setting the additional binding because setting it
+  ;; helps suppress an annoying warning message.
+  (persp-mode-prefix-key (kbd "C-c M-p"))
+  :init 
+  (persp-mode)
+  :config
+  ;; Sets a file to write to when we save states
+  (setq persp-state-default-file "~/.config/emacs/sessions"))
+
+;; This will group buffers by persp-name in ibuffer.
+(add-hook 'ibuffer-hook
+          (lambda ()
+            (persp-ibuffer-set-filter-groups)
+            (unless (eq ibuffer-sorting-mode 'alphabetic)
+              (ibuffer-do-sort-by-alphabetic))))
+
+;; Automatically save perspective states to file when Emacs exits.
+(add-hook 'kill-emacs-hook #'persp-state-save)
+
