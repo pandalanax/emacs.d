@@ -146,6 +146,10 @@
     "o" '(:ignore t :wk "Open")
     "o t" '(vterm-toggle :wk "open vterm"))
 
+  (dt/leader-keys
+    "s" '(:ignore t :wk "shell")
+    "s s" '(async-shell-command :wk "open async shell command"))
+
     (dt/leader-keys
     "p" '(:ignore t :wk "projectile")
     "p f" '(projectile-find-file :wk "Find file")
@@ -155,6 +159,7 @@
     "p s g" '(projectile-grep :wk "Grep in project")
     "p k" '(projectile-kill-buffers :wk "Kill project buffers")
     "p v" '(dired-jump :wk "Open dired in current dir"))
+
 
 (dt/leader-keys
   "g" '(:ignore t :wk "Git")
@@ -500,3 +505,5 @@ one, an error is signaled."
 (use-package nix-mode
   :mode "\\.nix\\'")
 
+
+(setq confirm-kill-processes nil)
